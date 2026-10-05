@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Sync MonsGeek FUN60 Pro static color to the Windows accent color.
 
 Reads the accent DWORD from the registry and sends it to the keyboard

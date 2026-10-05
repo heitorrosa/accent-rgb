@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Interactive color calibration for accent-rgb.
 
 LEDs + diffuser shift hues, so sending the accent RGB verbatim looks off.
