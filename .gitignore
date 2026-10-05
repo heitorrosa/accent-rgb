@@ -1,0 +1,4 @@
+#pragma once
+__pycache__/
+*.pyc
+.venv/
