@@ -57,4 +57,4 @@ saved pairs without re-tuning.
 
 ## License
 
-Licensed with GPL-3.0-or-later, see LICENSE.
+Licensed with GPL-3.0, see LICENSE.
