@@ -3,7 +3,7 @@
 Background script that paints a MonsGeek FUN60 Pro the current Windows accent color.
 
 Protocol vendored (single file, MIT) from
-[Lightning-13/monsgeek-rgb](https://github.com/Lightning-13/monsgeek-rgb) —
+[Lightning-13/monsgeek-rgb](https://github.com/Lightning-13/monsgeek-rgb) -
 `monsgeek_rgb/protocol.py` + `devices.py` inlined into `accent_rgb.py`, so the
 only install is `hidapi`. HID packet: 65-byte feature report
 `07 01 04 04 08 RR GG BB checksum` to VID `0x3151` / PID `0x5026` (2.4 GHz) or
@@ -50,7 +50,11 @@ saved pairs without re-tuning.
 
 ## Files
 
-- `accent_rgb.py` — the whole app (registry read + HID + poll loop)
-- `calibrate.py` — one-time tuning UI + matrix fit
-- `calibration.json` — your pairs + fitted matrix (gitignored, personal)
-- `requirements.txt` — `hidapi`
+- `accent_rgb.py` - the whole app (registry read + HID + poll loop)
+- `calibrate.py` - one-time tuning UI + matrix fit
+- `calibration.json` - your pairs + fitted matrix (gitignored, personal)
+- `requirements.txt` - `hidapi`
+
+## License
+
+Licensed with GPL-3.0-or-later, see LICENSE.
