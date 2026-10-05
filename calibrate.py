@@ -134,7 +134,21 @@ def collect():
 
 
 def main() -> int:
-    refit_only = "--refit" in sys.argv[1:]
+    args = sys.argv[1:]
+    if "--drop" in args:  # e.g. --drop 00FFFF 00C0A0 -> forget those pairs so next run re-tunes them
+        i = args.index("--drop")
+        hs = []
+        for a in args[i + 1:]:
+            if a.startswith("--"):
+                break
+            hs.append(a.strip().lstrip("#").upper())
+        data = json.loads(CALIB.read_text()) if CALIB.exists() else {"pairs": []}
+        before = len(data["pairs"])
+        data["pairs"] = [p for p in data["pairs"] if "%02X%02X%02X" % tuple(p[0]) not in hs]
+        CALIB.write_text(json.dumps(data, indent=1))
+        print(f"dropped {before - len(data['pairs'])} pair(s); {len(data['pairs'])} remain. re-run to retune.")
+        return 0
+    refit_only = "--refit" in args
     pairs = None
     if not refit_only:
         pairs = collect()

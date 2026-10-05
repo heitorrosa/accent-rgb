@@ -23,8 +23,12 @@ Usage:
 """
 
 import argparse
+import json
 import time
 import winreg
+from pathlib import Path
+
+CALIB_PATH = Path(__file__).parent / "calibration.json"
 
 # ponytail: vendored from Lightning-13/monsgeek-rgb (MIT) so this repo stays one file.
 # Upstream: https://github.com/Lightning-13/monsgeek-rgb (monsgeek_rgb/protocol.py, devices.py)
@@ -100,11 +104,8 @@ def dword_to_rgb(dword: int) -> tuple[int, int, int]:
 
 def load_correction():
     """Load fitted 3x4 matrix from calibration.json, or None."""
-    import json
-    from pathlib import Path
-
     try:
-        m = json.loads((Path(__file__).parent / "calibration.json").read_text())["matrix"]
+        m = json.loads(CALIB_PATH.read_text())["matrix"]
         return [[float(x) for x in row] for row in m] if len(m) == 3 else None
     except (OSError, ValueError, KeyError, TypeError):
         return None
@@ -134,9 +135,7 @@ def main() -> int:
         return 0
 
     last = None
-    corr = load_correction()
-    if corr and (args.verbose or args.once):
-        print("calibration.json correction active", flush=True)
+    corr, corr_mtime = None, 0  # hot-reloaded when calibrate.py rewrites the file
     while True:
         try:
             dword, src = read_accent_dword()
@@ -147,6 +146,14 @@ def main() -> int:
             time.sleep(args.poll)
             continue
         rgb = dword_to_rgb(dword)
+        try:
+            mt = CALIB_PATH.stat().st_mtime
+        except OSError:
+            mt = 0
+        if mt != corr_mtime:  # retuned -> apply live, no restart needed
+            corr, corr_mtime = load_correction(), mt
+            if corr:
+                log("calibration (re)loaded")
         send = apply_correction(rgb, corr) if corr else rgb
         if send != last:
             try:
