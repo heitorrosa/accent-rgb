@@ -38,7 +38,19 @@ The Custom Layer commits to flash (see upstream `docs/limitations.md`).
 The script polls the registry but only sends a HID report when the RGB value
 actually changes, so it won't wear flash or flicker.
 
+## Calibration (keyboard lies about colors)
+
+LEDs + diffuser shift hues, so the accent on screen never matches the keys.
+Fix: `python calibrate.py` opens all 20 target swatches in your browser,
+puts each one on the keyboard, and asks what RGB *looks* right (Enter =
+accept, `q` = save + resume later). It fits a 3x4 color-correction matrix
+(least squares, stdlib only) into `calibration.json`, which `accent_rgb.py`
+then applies to every update. `python calibrate.py --refit` re-fits from
+saved pairs without re-tuning.
+
 ## Files
 
 - `accent_rgb.py` — the whole app (registry read + HID + poll loop)
+- `calibrate.py` — one-time tuning UI + matrix fit
+- `calibration.json` — your pairs + fitted matrix (gitignored, personal)
 - `requirements.txt` — `hidapi`

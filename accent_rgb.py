@@ -98,6 +98,23 @@ def dword_to_rgb(dword: int) -> tuple[int, int, int]:
     return dword & 0xFF, (dword >> 8) & 0xFF, (dword >> 16) & 0xFF  # 0xAABBGGRR
 
 
+def load_correction():
+    """Load fitted 3x4 matrix from calibration.json, or None."""
+    import json
+    from pathlib import Path
+
+    try:
+        m = json.loads((Path(__file__).parent / "calibration.json").read_text())["matrix"]
+        return [[float(x) for x in row] for row in m] if len(m) == 3 else None
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+
+
+def apply_correction(rgb: tuple[int, int, int], m) -> tuple[int, int, int]:
+    r, g, b = (float(x) for x in rgb)
+    return tuple(max(0, min(255, round(row[0] * r + row[1] * g + row[2] * b + row[3]))) for row in m)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="Sync MonsGeek RGB to Windows accent color.")
     ap.add_argument("--once", action="store_true", help="set once and exit")
@@ -117,6 +134,9 @@ def main() -> int:
         return 0
 
     last = None
+    corr = load_correction()
+    if corr and (args.verbose or args.once):
+        print("calibration.json correction active", flush=True)
     while True:
         try:
             dword, src = read_accent_dword()
@@ -127,16 +147,18 @@ def main() -> int:
             time.sleep(args.poll)
             continue
         rgb = dword_to_rgb(dword)
-        if rgb != last:
+        send = apply_correction(rgb, corr) if corr else rgb
+        if send != last:
             try:
-                set_keyboard(*rgb)
+                set_keyboard(*send)
             except Exception as e:  # keyboard unplugged, hid missing, etc. -- retry next poll
                 print(f"keyboard: {e}", flush=True)
                 if args.once:
                     return 1
             else:
-                log(f"set #{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X} from {src}")
-                last = rgb
+                log(f"set #{send[0]:02X}{send[1]:02X}{send[2]:02X} from {src}"
+                    + (f" (target #{rgb[0]:02X}{rgb[1]:02X}{rgb[2]:02X})" if corr else ""))
+                last = send
         if args.once:
             return 0
         time.sleep(args.poll)
