@@ -29,8 +29,9 @@ import winreg
 # ponytail: vendored from Lightning-13/monsgeek-rgb (MIT) so this repo stays one file.
 # Upstream: https://github.com/Lightning-13/monsgeek-rgb (monsgeek_rgb/protocol.py, devices.py)
 SUPPORTED_DEVICES = [
-    {"vendor_id": 0x3151, "product_id": 0x5026, "usage_page": 0xFFFF, "usage": 0x02},  # 2.4 GHz
-    {"vendor_id": 0x3151, "product_id": 0x502F, "usage_page": 0xFFFF, "usage": 0x02},  # wired
+    {"vendor_id": 0x3151, "product_id": 0x5026, "usage_page": 0xFFFF, "usage": 0x02},  # FUN60 Pro 2.4 GHz (upstream)
+    {"vendor_id": 0x3151, "product_id": 0x502F, "usage_page": 0xFFFF, "usage": 0x02},  # FUN60 Pro wired (upstream)
+    {"vendor_id": 0x3151, "product_id": 0x502D, "usage_page": 0xFFFF, "usage": 0x02},  # observed MI_02 on this machine
 ]
 
 
@@ -64,7 +65,7 @@ def set_keyboard(r: int, g: int, b: int) -> None:
 
     path = find_keyboard_path()
     if path is None:
-        raise RuntimeError("Compatible MonsGeek keyboard not found (FUN60 Pro 0x3151:0x5026/0x502F).")
+        raise RuntimeError("Compatible MonsGeek keyboard not found (0x3151:0x5026/0x502F/0x502D).")
     dev = hid.device()
     try:
         dev.open_path(path)
